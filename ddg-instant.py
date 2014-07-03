@@ -20,6 +20,8 @@ query_params = {
   'skip_disambig': '1'
 }
 r = requests.get(SEARCH_URL, params=query_params)
+
+# Debugging info
 # print(r.url)
 # print(r.status_code)
 # print(r.text)
@@ -28,32 +30,30 @@ r = requests.get(SEARCH_URL, params=query_params)
 if r.status_code == requests.codes.ok:
   results = r.json()
 
-  if results['Heading']:
-    print(results['Heading'])
-    underline = ''
-    for c in results['Heading']:
-      underline += '='
-    print(underline+'\n')
-
   if results['Redirect']:
-    print('<'+results['Redirect']+'>')
+    str_buffer = '<' + results['Redirect'] + '>\n'
+  else:
+    str_buffer = ''
+    if results['Heading']:
+      str_buffer += results['Heading'] + ': '
 
-  if results['Answer']:
-    print(results['Answer'])
+    if results['Answer']:
+      str_buffer += results['Answer'] + '\n'
 
-  if results['Definition']:
-    print(results['Definition'])+' <'+results['DefinitionURL']+'>'
+    if results['Definition']:
+      str_buffer += results['Definition'] + ' <' + results['DefinitionURL'] + '>\n'
 
-  if results['AbstractText']:
-    print(results['AbstractText']+' <'+results['AbstractURL']+'>')
+    if results['AbstractText']:
+      str_buffer += results['AbstractText'] + ' <' + results['AbstractURL'] + '>\n'
 
-  if results['Type'] == 'C' or results['Type'] == 'D':
-    for t in results['RelatedTopics']:
-      if 'Text' in t and 'FirstURL' in t:
-        print('* '+t['Text']+' <'+t['FirstURL']+'>')
-      elif 'Name' in t and 'Topics' in t:
-        print('* '+t['Name'])
-        for sub_t in t['Topics']:
-          print('** '+sub_t['Text']+' <'+sub_t['FirstURL']+'>')
+    if results['Type'] == 'C' or results['Type'] == 'D':
+      for t in results['RelatedTopics']:
+        if 'Text' in t and 'FirstURL' in t:
+          str_buffer += '\n* ' + t['Text'] + ' <' + t['FirstURL'] + '>'
+        elif 'Name' in t and 'Topics' in t:
+          str_buffer += '\n* ' + t['Name']
+          for sub_t in t['Topics']:
+            str_buffer += '\n** '+sub_t['Text']+' <'+sub_t['FirstURL']+'>'
+      str_buffer += '\n'
 
-  print("\nResults from DuckDuckGo <https://duckduckgo.com>.")
+  print(str_buffer + '\nResults from DuckDuckGo <https://duckduckgo.com>.')
